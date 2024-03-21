@@ -20,4 +20,5 @@ class Boat {
     required this.ngayDangKi,
     required this.ngayHetHanDangKy,
   });
+
 }

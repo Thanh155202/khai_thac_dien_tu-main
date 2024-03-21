@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+
 class Ship {
   final String shipCode;
   final List<Voyage> voyages;
@@ -117,7 +118,7 @@ class _NhatKiState extends State<NhatKi> {
           backgroundColor: Colors.red,
           centerTitle: true,
           title: Text(
-            'Nhật kí khai thác',
+            'Nhật ký khai thác',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           leading: IconButton(
@@ -189,8 +190,11 @@ class _NhatKiState extends State<NhatKi> {
                         SizedBox(height: 30,),
                         if (showImage) // Display image based on the showImage state
                           Padding(
-                            padding: const EdgeInsets.only(left: 50.0, right: 50, bottom: 250),
-                            child: Image.asset('lib/assets/images/search_info.png'),
+                            padding: const EdgeInsets.only(left: 50.0, right: 120, bottom: 250),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Image.asset('lib/assets/images/search_info.png'),
+                              ),
                           ),
                         if (selectedShip != null && selectedVoyage != null)
                           Column(

@@ -1,12 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
 import '../../models/boatModel.dart';
 import '../../services/api_service.dart';
 import '../../utils/widget_support.dart';
 
 class QuanLiTau extends StatefulWidget {
+  const QuanLiTau({super.key});
+
   @override
   _QuanLiTauState createState() => _QuanLiTauState();
 }
@@ -30,11 +29,11 @@ class _QuanLiTauState extends State<QuanLiTau> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.red,
         centerTitle: true,
-        title: Text(
-          'Quản lí tàu',
+        title: const Text(
+          'Thông tin tàu',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -48,10 +47,10 @@ class _QuanLiTauState extends State<QuanLiTau> {
               child: Column(
                 children: [
                   Card(
-                    color: Color(0xFFFEEAE6),
+                    color: const Color(0xFFFEEAE6),
                     child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                      leading: Container(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      leading: SizedBox(
                         width: 50,
                         height: 50,
                         child: Image.asset(
@@ -68,7 +67,7 @@ class _QuanLiTauState extends State<QuanLiTau> {
                             Expanded(
                               child: Text(
                                 'Tàu ${boatList[index].soHieuTau}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 17,
                                 ),
                               ),
@@ -102,11 +101,11 @@ class _QuanLiTauState extends State<QuanLiTau> {
                     curve: Curves.easeInOut,
                     child: selectedTrainIndex == index
                         ? Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
+                            padding: const EdgeInsets.only(top: 5.0),
                             child: DataTable(
                               columns: [
-                                DataColumn(label: Text('Thuộc tính')),
-                                DataColumn(label: Text('Thông tin')),
+                                DataColumn(label: Text('Thuộc tính',style: TextStyle(fontWeight: FontWeight.bold),),),
+                                DataColumn(label: Text('Thông tin',style: TextStyle(fontWeight: FontWeight.bold),),),
                               ],
                               rows: [
                                 DataRow(cells: [
@@ -143,7 +142,7 @@ class _QuanLiTauState extends State<QuanLiTau> {
                                   DataCell(Text(boatList[index].ngayDangKi))
                                 ]),
                                 DataRow(cells: [
-                                  DataCell(Text("Ngày hết hạnđăng kí")),
+                                  DataCell(Text("Ngày hết hạn đăng kí")),
                                   DataCell(Text(boatList[index].ngayHetHanDangKy))
                                 ]),
                               ],

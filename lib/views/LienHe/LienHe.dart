@@ -46,11 +46,9 @@ class _LienHeState extends State<LienHe> {
             SizedBox(
               height: screenSize.height * 0.02,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
+            Flexible(
+              flex: 2,
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Image.asset(
@@ -112,12 +110,10 @@ class _LienHeState extends State<LienHe> {
                     ),
                   ],
                 ),
-              ],
             ),
-          ],
+            ],
         ),
-      ),
-
-    );
+        ),
+      );
   }
 }

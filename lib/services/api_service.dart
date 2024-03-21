@@ -12,17 +12,18 @@ class ApiService {
       final List<dynamic> jsonData = json.decode(response.body)['ship_list'];
 
       List<Boat> boatList = jsonData
-          .map((json) => Boat(
-        soHieuTau: json['so_hieu_tau'],
-        thuyenTruong: json['thuyen_truong'],
-        loaiThietBi: json['loai_thiet_bi'],
-        tenThietBi: json['ten_thiet_bi'],
-        imo: json['IMO'],
-        soKepChi: json['so_kep_chi'],
-        ngayNiemPhong: json['ngay_niem_phong'],
-        ngayDangKi: json['ngay_dang_ky'],
-        ngayHetHanDangKy: json['ngay_het_han_dang_ky'],
-      ))
+          .map((json) =>
+          Boat(
+            soHieuTau: json['so_hieu_tau'],
+            thuyenTruong: json['thuyen_truong'],
+            loaiThietBi: json['loai_thiet_bi'],
+            tenThietBi: json['ten_thiet_bi'],
+            imo: json['IMO'],
+            soKepChi: json['so_kep_chi'],
+            ngayNiemPhong: json['ngay_niem_phong'],
+            ngayDangKi: json['ngay_dang_ky'],
+            ngayHetHanDangKy: json['ngay_het_han_dang_ky'],
+          ))
           .toList();
 
       onDataLoaded(boatList);
@@ -30,5 +31,4 @@ class ApiService {
       print('Failed to load data. Status code: ${response.statusCode}');
     }
   }
-
 }

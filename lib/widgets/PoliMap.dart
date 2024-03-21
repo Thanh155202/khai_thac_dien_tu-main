@@ -242,7 +242,7 @@ class _PolylineMapState extends State<PolylineMap> {
     for (ShipLocation shipLocation in shipLocations) {
       BitmapDescriptor.fromAssetImage(
         ImageConfiguration(size: Size(48, 48)), // Adjust the size as needed
-        'lib/assets/images/bg13.png',
+        'lib/assets/images/fishing-boat-resize.png',
       ).then((bitmapDescriptor) {
         markers.add(
           Marker(
@@ -274,8 +274,8 @@ class _PolylineMapState extends State<PolylineMap> {
             height: 200,
             child: DataTable(
               columns: [
-                DataColumn(label: Text('Chi tiết')),
-                DataColumn(label: Text('Thông tin')),
+                DataColumn(label: Text('Chi tiết',style: TextStyle(fontWeight: FontWeight.bold),),),
+                DataColumn(label: Text('Thông tin',style: TextStyle(fontWeight: FontWeight.bold),),),
               ],
               rows: [
                 DataRow(cells: [

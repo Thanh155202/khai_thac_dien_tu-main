@@ -101,24 +101,6 @@ class _MobileLoginLayoutState extends State<MobileLoginLayout> {
                       height: 24,
                     ),
                   ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width*0.07),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      checkColor: Colors.white,
-                      activeColor: Colors.green,
-                      value: isChecked,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isChecked = value!;
-                        });
-                      },
-                    ),
-                    Text("Nhớ mật khẩu", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),)
-                  ],
-                ),
-              ),
                   SizedBox(
                     height: screenSize.height * 0.03,
                   ),

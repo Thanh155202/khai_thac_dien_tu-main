@@ -1,9 +1,16 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:originproject/widgets/shipHistory.dart';
 import '../../models/boatModel.dart';
 import '../../services/api_service.dart';
 import '../../widgets/PoliMap.dart';
 import '../../widgets/dropdown.dart';
 import '../../widgets/myButton.dart';
+import 'dart:async'; // Import thư viện Timer
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
+
 
 class TheoDoiHaiTrinh extends StatefulWidget {
   final String tenTau;
@@ -14,17 +21,31 @@ class TheoDoiHaiTrinh extends StatefulWidget {
   State<TheoDoiHaiTrinh> createState() => _TheoDoiHaiTrinhState();
 }
 
+class ShipHistoryEntry {
+  final LatLng coordinate;
+  final String time;
+
+  ShipHistoryEntry({
+    required this.coordinate,
+    required this.time,
+  });
+}
+
 class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
   ApiService apiService = ApiService();
   List<Boat> listBoats = [];
-  String selectedBoatSoHieuTau = '';
-  String selectedSoHieuTau = 'BĐ-29283';
+  String selectedBoatSoHieuTau = ''; // Biến để lưu trữ tàu được chọn
+  String selectedSoHieuTau = '';
   String selectedChuyenBien = '1';
   DateTime? _startDate1;
   DateTime? _startDate2;
+  bool showShipHistory = false; // Biến kiểm soát hiển thị lịch sử tàu
+  List<ShipHistoryEntry> shipHistory = []; // Khai báo biến shipHistory
+
   @override
   void initState() {
     super.initState();
+    selectedBoatSoHieuTau = listBoats.isNotEmpty ? listBoats[0].soHieuTau : '';
     fetchData();
   }
 
@@ -33,8 +54,8 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
       setState(() {
         listBoats = boats;
         // Set the default selected boat if needed
-        selectedBoatSoHieuTau = listBoats.isNotEmpty ? listBoats[0].soHieuTau : '';
-
+        selectedBoatSoHieuTau =
+            listBoats.isNotEmpty ? listBoats[0].soHieuTau : '';
       });
     });
   }
@@ -45,6 +66,28 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      locale: Locale('vi', ''), // Tiếng Việt,
+      // Thay đổi các lời nhắc sang tiếng Việt
+      helpText: 'Chọn ngày',
+      cancelText: 'Hủy',
+      confirmText: 'Chọn',
+      errorFormatText: 'Định dạng ngày không hợp lệ',
+      errorInvalidText: 'Ngày không hợp lệ',
+      fieldLabelText: 'Chọn ngày',
+      fieldHintText: 'Tháng/Ngày/Năm',
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.red, // Màu chủ đạo của lịch
+            hintColor: Colors.red, // Màu nút chọn
+            colorScheme: ColorScheme.light(primary: Colors.red),
+            buttonTheme: ButtonThemeData(
+              textTheme: ButtonTextTheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null && picked != _startDate1) {
@@ -52,6 +95,8 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
         _startDate1 = picked;
       });
     }
+    // Hiển thị thứ và tháng bằng tiếng Việt
+    print(DateFormat.yMMMMEEEEd('vi').format(picked!));
   }
 
   Future<void> _selectStartDate2(BuildContext context) async {
@@ -60,6 +105,28 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
       initialDate: _startDate2 ?? _startDate1 ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      locale: Locale('vi', ''), // Tiếng Việt,
+      // Thay đổi các lời nhắc sang tiếng Việt
+      helpText: 'Chọn ngày',
+      cancelText: 'Hủy',
+      confirmText: 'Chọn',
+      errorFormatText: 'Định dạng ngày không hợp lệ',
+      errorInvalidText: 'Ngày không hợp lệ',
+      fieldLabelText: 'Chọn ngày',
+      fieldHintText: 'Tháng/Ngày/Năm',
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.red, // Màu chủ đạo của lịch
+            hintColor: Colors.red, // Màu nút chọn
+            colorScheme: ColorScheme.light(primary: Colors.red),
+            buttonTheme: ButtonThemeData(
+              textTheme: ButtonTextTheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null && picked != _startDate2) {
@@ -68,19 +135,20 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
           _startDate2 = picked;
         });
       } else {
-        // Handle the case where the selected end date is earlier than the start date
+        // Xử lý trường hợp ngày kết thúc được chọn sớm hơn ngày bắt đầu
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Lỗi'),
-              content: Text('Ngày kết thúc không thể trước ngày bắt đầu.'),
+              title: const Text('Lỗi'),
+              content:
+                  const Text('Ngày kết thúc không thể trước ngày bắt đầu.'),
               actions: [
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Đóng'),
+                  child: const Text('Đóng'),
                 ),
               ],
             );
@@ -88,6 +156,8 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
         );
       }
     }
+    // Hiển thị thứ và tháng bằng tiếng Việt
+    print(DateFormat.yMMMMEEEEd('vi').format(picked!));
   }
 
   @override
@@ -95,10 +165,10 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
     Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
         backgroundColor: Colors.red,
-        title: Text(
+        title: const Text(
           'Theo dõi hải trình',
           style: TextStyle(
             color: Colors.white,
@@ -106,7 +176,7 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
           ),
         ),
       ),
-      body: Container(
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -141,8 +211,31 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
                       Padding(
                         padding: EdgeInsets.only(left: screenSize.width * 0.03),
                         child: CustomDropdown(
-                          items: listBoats,
-                          selectedValue: listBoats.firstWhere((boat) => boat.soHieuTau == selectedBoatSoHieuTau),
+                          items: listBoats.isNotEmpty ? listBoats : [],
+                          selectedValue: listBoats.isNotEmpty
+                              ? listBoats.firstWhere(
+                                  (boat) =>
+                                      boat.soHieuTau == selectedBoatSoHieuTau,
+                                  orElse: () => Boat(
+                                      soHieuTau: 'soHieuTau',
+                                      thuyenTruong: 'thuyenTruong',
+                                      loaiThietBi: 'loaiThietBi',
+                                      tenThietBi: 'tenThietBi',
+                                      imo: 'imo',
+                                      soKepChi: 'soKepChi',
+                                      ngayNiemPhong: 'ngayNiemPhong',
+                                      ngayDangKi: 'ngayDangKi',
+                                      ngayHetHanDangKy: 'ngayHetHanDangKy'))
+                              : Boat(
+                                  soHieuTau: 'soHieuTau',
+                                  thuyenTruong: 'thuyenTruong',
+                                  loaiThietBi: 'loaiThietBi',
+                                  tenThietBi: 'tenThietBi',
+                                  imo: 'imo',
+                                  soKepChi: 'soKepChi',
+                                  ngayNiemPhong: 'ngayNiemPhong',
+                                  ngayDangKi: 'ngayDangKi',
+                                  ngayHetHanDangKy: 'ngayHetHanDangKy'),
                           onChanged: (Boat value) {
                             setState(() {
                               selectedBoatSoHieuTau = value.soHieuTau;
@@ -158,130 +251,144 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
-                  height: MediaQuery.of(context).size.width / 4,
-                  width: MediaQuery.of(context).size.width / 3,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'lib/assets/images/location.png',
-                            width: screenSize.width * 0.05,
-                            height: screenSize.width * 0.055,
-                            color: Colors.green,
-                          ),
-                          Text(
-                            "Ngày bắt đầu",
-                            style:
-                                TextStyle(fontSize: screenSize.width * 0.045),
-                          )
-                        ],
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: Container(
+                    height: MediaQuery.of(context).size.width / 4,
+                    width: MediaQuery.of(context).size.width / 2.5,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
                           children: [
-                            Container(
-                              child: _startDate1 == null
-                                  ? Padding(
-                                      padding: EdgeInsets.only(
-                                          left: screenSize.width * 0.02),
-                                      child: Text(
-                                        'Chọn ngày',
-                                        style: TextStyle(
-                                            fontSize: screenSize.width * 0.03,
-                                            color: Colors.black),
-                                      ),
-                                    )
-                                  : Padding(
-                                      padding: EdgeInsets.only(
-                                          left: screenSize.width * 0.03),
-                                      child: Text(
-                                        '${_startDate1!.day}/${_startDate1!.month}/${_startDate1!.year} ',
-                                        style: TextStyle(
-                                            fontSize: screenSize.width * 0.03),
-                                      ),
-                                    ),
+                            Image.asset(
+                              'lib/assets/images/location.png',
+                              width: screenSize.width * 0.05,
+                              height: screenSize.width * 0.055,
+                              color: Colors.green,
                             ),
-                            TextButton(
-                              onPressed: () => _selectStartDate1(context),
-                              child: Icon(Icons.arrow_drop_down,
-                                  size: screenSize.width * 0.08,
-                                  color: Colors.black),
+                            Flexible(
+                              fit: FlexFit.tight,
+                              child: Text(
+                                "Ngày bắt đầu",
+                                style: TextStyle(
+                                    fontSize: screenSize.width * 0.045),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                child: _startDate1 == null
+                                    ? Padding(
+                                        padding: EdgeInsets.only(
+                                            left: screenSize.width * 0.02),
+                                        child: Text(
+                                          'Chọn ngày',
+                                          style: TextStyle(
+                                              fontSize: screenSize.width * 0.03,
+                                              color: Colors.black),
+                                        ),
+                                      )
+                                    : Padding(
+                                        padding: EdgeInsets.only(
+                                            left: screenSize.width * 0.03),
+                                        child: Text(
+                                          '${_startDate1!.day}/${_startDate1!.month}/${_startDate1!.year} ',
+                                          style: TextStyle(
+                                              fontSize:
+                                                  screenSize.width * 0.03),
+                                        ),
+                                      ),
+                              ),
+                              TextButton(
+                                onPressed: () => _selectStartDate1(context),
+                                child: Icon(Icons.arrow_drop_down,
+                                    size: screenSize.width * 0.08,
+                                    color: Colors.black),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Container(
-                  height: MediaQuery.of(context).size.width / 4,
-                  width: MediaQuery.of(context).size.width / 3,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
+                Flexible(
+                    fit: FlexFit.loose,
+                    child: Container(
+                      height: MediaQuery.of(context).size.width / 4,
+                      width: MediaQuery.of(context).size.width / 2.5,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Image.asset(
-                            'lib/assets/images/location.png',
-                            width: screenSize.width * 0.05,
-                            height: screenSize.width * 0.055,
-                            color: Colors.red,
+                          Row(
+                            children: [
+                              Image.asset(
+                                'lib/assets/images/location.png',
+                                width: screenSize.width * 0.05,
+                                height: screenSize.width * 0.055,
+                                color: Colors.red,
+                              ),
+                              Flexible(
+                                fit: FlexFit.tight,
+                                child: Text(
+                                  "Ngày kết thúc",
+                                  style: TextStyle(
+                                      fontSize: screenSize.width * 0.045),
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            "Ngày kết thúc",
-                            style:
-                                TextStyle(fontSize: screenSize.width * 0.045),
-                          )
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  child: _startDate2 == null
+                                      ? Padding(
+                                          padding: EdgeInsets.only(
+                                              left: screenSize.height * 0.01),
+                                          child: Text(
+                                            'Chọn ngày',
+                                            style: TextStyle(
+                                                fontSize:
+                                                    screenSize.width * 0.03,
+                                                color: Colors.black),
+                                          ),
+                                        )
+                                      : Padding(
+                                          padding: EdgeInsets.only(
+                                              left: screenSize.width * 0.03),
+                                          child: Text(
+                                            '${_startDate2!.day}/${_startDate2!.month}/${_startDate2!.year} ',
+                                            style: TextStyle(
+                                                fontSize:
+                                                    screenSize.width * 0.03),
+                                          ),
+                                        ),
+                                ),
+                                TextButton(
+                                  onPressed: () => _selectStartDate2(context),
+                                  child: Icon(Icons.arrow_drop_down,
+                                      size: screenSize.width * 0.08,
+                                      color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              child: _startDate2 == null
-                                  ? Padding(
-                                      padding: EdgeInsets.only(
-                                          left: screenSize.height * 0.01),
-                                      child: Text(
-                                        'Chọn ngày',
-                                        style: TextStyle(
-                                            fontSize: screenSize.width * 0.03,
-                                            color: Colors.black),
-                                      ),
-                                    )
-                                  : Padding(
-                                      padding: EdgeInsets.only(
-                                          left: screenSize.width * 0.03),
-                                      child: Text(
-                                        '${_startDate2!.day}/${_startDate2!.month}/${_startDate2!.year} ',
-                                        style: TextStyle(
-                                            fontSize: screenSize.width * 0.03),
-                                      ),
-                                    ),
-                            ),
-                            TextButton(
-                              onPressed: () => _selectStartDate2(context),
-                              child: Icon(Icons.arrow_drop_down,
-                                  size: screenSize.width * 0.08,
-                                  color: Colors.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
+                    )),
               ],
             ),
             Container(
@@ -294,11 +401,12 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
                     onTap: () {
                       // Kiểm tra xem cả ngày bắt đầu và ngày kết thúc đã được chọn hay chưa
                       if (_startDate1 != null && _startDate2 != null) {
+                        _onSearchButtonPressed(); // Khi nhấn nút "Tìm kiếm", hiển thị lịch sử tàu
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: Text('Thông tin tìm kiếm'),
+                              title: const Text('Thông tin tìm kiếm'),
                               content: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
@@ -314,7 +422,7 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
-                                  child: Text('Đóng'),
+                                  child: const Text('Đóng'),
                                 ),
                               ],
                             );
@@ -325,15 +433,15 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: Text('Lỗi'),
-                              content: Text(
+                              title: const Text('Lỗi'),
+                              content: const Text(
                                   'Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.'),
                               actions: [
                                 ElevatedButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
-                                  child: Text('Đóng'),
+                                  child: const Text('Đóng'),
                                 ),
                               ],
                             );
@@ -349,109 +457,67 @@ class _TheoDoiHaiTrinhState extends State<TheoDoiHaiTrinh> {
                         fontSize: screenSize.width * 0.042,
                         color: Colors.white),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              insetPadding: EdgeInsets.all(25),
-                              content: Container(
-                                width: 600.0,
-                                height: 900.0,
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      height: screenSize.height * 0.02,
-                                    ),
-                                    Text(
-                                      'BĐ-92130-TS',
-                                      style: TextStyle(
-                                          color: Colors.red,
-                                          fontSize: screenSize.width * 0.05,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                      height: screenSize.height * 0.02,
-                                    ),
-                                    Container(
-                                      height: 1,
-                                      width: screenSize.width * 0.7,
-                                      color: Colors.black,
-                                    ),
-                                    DataTable(
-                                      columns: [
-                                        DataColumn(label: Text('Thời gian')),
-                                        DataColumn(label: Text('Vị trí')),
-                                      ],
-                                      rows: [
-                                        DataRow(cells: [
-                                          DataCell(Text('1AM')),
-                                          DataCell(Text(
-                                              "Vị trí 1")),
-                                        ]),
-                                        DataRow(cells: [
-                                          DataCell(Text('2AM')),
-                                          DataCell(Text(
-                                              "Vị trí 2")),
-                                        ]),
-                                        DataRow(cells: [
-                                          DataCell(Text('3AM')),
-                                          DataCell(Text(
-                                              "Vị trí 3")),
-                                        ]),
-                                        DataRow(cells: [
-                                          DataCell(Text('4AM')),
-                                          DataCell(Text(
-                                              "Vị trí 4")),
-                                        ]),DataRow(cells: [
-                                          DataCell(Text('5AM')),
-                                          DataCell(Text(
-                                              "Vị trí 5")),
-                                        ]),
 
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text('Đóng'),
-                                ),
-                              ],
-                            );
-                          });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.only(right: screenSize.width * 0.05),
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            'lib/assets/images/menu_hi.png',
-                            width: screenSize.width * 0.1,
-                            height: screenSize.height * 0.05,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 25.0),
-              child: Container(
-                height: 540,
-                child: PolylineMap(),
+              child: SizedBox(
+                height: 625,
+                child: Stack(
+                  children: [
+                    if (!showShipHistory) PolylineMap(),
+                    // Hiển thị PolylineMap nếu showShipHistory là false
+                    Visibility(
+                      visible: showShipHistory,
+                      child: ShipHistoryWidget(
+                        selectedBoat: selectedSoHieuTau,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  // Hàm xử lý sự kiện khi nhấn nút "Tìm kiếm"
+  void _onSearchButtonPressed() {
+    setState(() {
+      selectedSoHieuTau = selectedBoatSoHieuTau; // Cập nhật tàu được chọn
+      if (_startDate1 != null && _startDate2 != null) {
+        // Kiểm tra nếu ngày bắt đầu là ngày 23/11/2023 và ngày kết thúc là 13/1/2024
+        if (_startDate1!.isAtSameMomentAs(DateTime(2023, 11, 29)) &&
+            _startDate2!.isAtSameMomentAs(DateTime(2024, 1, 13))) {
+          // Hiển thị lịch sử tàu
+          showShipHistory = true;
+          // Thực hiện các thao tác cần thiết khi tìm thấy dữ liệu lịch sử tàu
+        } else {
+          // Hiển thị thông báo hoặc xử lý tùy ý khi không tìm thấy dữ liệu lịch sử tàu
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Thông báo'),
+                content: const Text(
+                    'Không tìm thấy dữ liệu lịch sử tàu cho thời gian đã chọn.'),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Đóng'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      }
+    });
   }
 }

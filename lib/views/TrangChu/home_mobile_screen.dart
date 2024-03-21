@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 10,
                   ),
                   Text(
-                    "Triệu Thanh Tùng",
+                    "Nguyễn Văn Thành",
                     style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -80,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   fit: BoxFit.cover,
                 ),
               ),
-              title: const Text('Tàu quản lí',style: TextStyle(color: Colors.black),),
+              title: const Text('Thông tin tàu',style: TextStyle(color: Colors.black),),
               selected: _selectedIndex == 0,
               onTap: () {
                 _onItemTapped(0);
@@ -129,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   fit: BoxFit.cover,
                 ),
               ),
-              title: const Text('Nhật kí khai thác',style: TextStyle(color: Colors.black)),
+              title: const Text('Nhật ký khai thác',style: TextStyle(color: Colors.black)),
               selected: _selectedIndex == 2,
               onTap: () {
                 _onItemTapped(2);
