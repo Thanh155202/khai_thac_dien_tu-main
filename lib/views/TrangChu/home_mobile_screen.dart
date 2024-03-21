@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 10,
                   ),
                   Text(
-                    "Triệu Thanh Tùng",
+                    "Nguyễn Văn Thành",
                     style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
